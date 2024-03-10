@@ -1,40 +1,47 @@
-let generateImageForm = 
-	document.getElementById('generate-image-form'); 
-let formInput = 
-	document.getElementById('input-value'); 
-let imageContainerText = 
-	document.getElementById('imageContainerText'); 
-let imageGenerated = 
-	document.getElementById('generated-image'); 
-let imageContainer = 
-	document.getElementById('images-visible'); 
+const API_KEY="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";
+const submitIcon=document.querySelector(".enter");
+const inputElement=document.querySelector("input");
+const imageSection=document.querySelector(".images-section");
 
-async function fetchImages(category) { 
-	try { 
-		let response = 
-		await fetch(`use a API`); 
-		if (!response.ok) { 
-			throw new Error('Unable to fetch the data'); 
-		} 
-		imageContainerText.innerText = 
-		"Below is your generated Image:"; 
-		imageContainer.style.display = "block"; 
-		imageGenerated.src = response.url; 
-		console.log(response.url); 
-	} 
-	catch (error) { 
-		console.log(error); 
-	} 
-} 
+var flag=0;
+getImages= async ()=>{
+	if(flag%2==0){
+		const options={
+			method:"POST",
+			headers:{
+				"Authorization":`Bearer ${API_KEY}`,
+				"Content-Type":"application/JSON"
+			},
+			body:JSON.stringify({
+				prompt:inputElement.value,
+				n:2,
+				size:"1024x1024"
+			})
+		}
+		try{
+			const response=await fetch("https://api.openai.com/v1/images/generations",options)
+			const data=await response.json()
+			console.log(data);
+			data?.data.forEach(imageObject=>{			
+				const imageContainer=document.createElement("div");
+				imageContainer.classList.add("image-container");
+				const imageElement=document.createElement("img");
+				imageElement.setAttribute("src",imageObject.url);
+				imageContainer.append(imageElement)
+				imageSection.append(imageContainer);
+			})
+		}
+	
+		catch (error){
+			console.log(error);
+		}
+		
+	}
+	else{
+		location.reload();
+	}
+	flag++;
+	
+}
 
-generateImageForm.addEventListener('submit', (e) => { 
-	e.preventDefault(); 
-	let enteredText = formInput.value; 
-	if (enteredText !== "") { 
-		fetchImages(enteredText); 
-	} 
-	else { 
-		imageContainerText.innerText = 
-			"Input field can not be empty!"; 
-	} 
-})
+submitIcon.addEventListener("click",getImages)
